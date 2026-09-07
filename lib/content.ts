@@ -1,0 +1,124 @@
+// Site content, kept in one place so real details can be swapped in easily.
+// Facts marked "REAL" come from the gym's discovery questionnaire, the owner's
+// approved "WhatsApp Knowledge & Guardrails" submission, live WhatsApp setup,
+// or the Google Business listing. "PLACEHOLDER" is generic copy standing in
+// until real testimonials are collected.
+
+import type { IconName } from "@/components/Icon";
+
+export const SITE = {
+  name: "Flex Fitness", // REAL
+  legalName: "Flex Fitness by Nithish™", // REAL — from the owner's approved submission
+  tagline: "Ayodhya of Bodybuilding", // REAL — from the brand logo
+  greetingLine: "Feel the vibe. Join the tribe.", // REAL — from the owner's approved WhatsApp greeting
+  ownerSignature: "By Nithish", // REAL — from the brand logo
+  neighborhood: "Gubbalala", // REAL
+  city: "Bengaluru", // REAL
+  whatsappNumber: "919019204104", // Testing number for now — owner will switch this to the real gym number (996440 6662) before launch
+  whatsappLink: "https://wa.me/919019204104",
+  whatsappTrialLink: "https://wa.me/919019204104?text=" + encodeURIComponent("Hi! I'd like to book a free trial at Flex Fitness."),
+  memberCount: "500+", // REAL — active members (discovery call)
+  transformationCount: "1,500+", // REAL — total health transformations (owner's approved submission)
+  sqft: "8,000 sq ft across 2 floors", // REAL
+  address: "C Square, 389/390, Jayanagar Housing Society (JHCS Layout), Gubbalala Main Road, Subramanyapura Post, Bengaluru 560061", // REAL
+  phone: "9964406662", // REAL — gym contact number
+  phoneAlt: "9964406663", // REAL — second gym contact number
+  email: "flexfitnessbynithish@gmail.com", // REAL
+  instagram: "https://www.instagram.com/flexfitnessbynithish_", // REAL
+  mapsLink: "https://share.google/7FgH3adUZvq2gApqK", // REAL — includes 360° view and photos/videos
+  minAge: 14, // REAL
+  logo: {
+    wordmark: "/brand/logo-wordmark.jpg", // crest + "FLEX FITNESS" + tagline, black bg
+    markGoldOnBlack: "/brand/logo-mark-gold-on-black.jpg",
+    markBlackOnWhite: "/brand/logo-mark-black-on-white.jpg",
+    markSquare: "/brand/logo-mark-square.jpg",
+  },
+};
+
+export const HOURS = [
+  { day: "Monday", time: "5:30 AM – 10:00 PM" },
+  { day: "Tuesday", time: "5:30 AM – 10:00 PM" },
+  { day: "Wednesday", time: "5:30 AM – 10:00 PM" },
+  { day: "Thursday", time: "5:30 AM – 10:00 PM" },
+  { day: "Friday", time: "5:30 AM – 10:00 PM" },
+  { day: "Saturday", time: "5:30 AM – 10:00 PM" },
+  { day: "Sunday", time: "8:00 AM – 1:00 PM" },
+]; // REAL
+export const HOLIDAY_POLICY = "Closed on national holidays and major Hindu festivals."; // REAL
+
+export const SERVICES: { name: string; description: string; icon: IconName; photo: string }[] = [
+  {
+    name: "General Gym",
+    description:
+      "Full-floor strength and cardio equipment across 4,000 sq ft, open every session for members training on their own schedule.",
+    icon: "dumbbell",
+    photo: "/gallery/general-gym.jpg",
+  },
+  {
+    name: "Personal Training",
+    description:
+      "One-on-one coaching built around your goals, available all day. Female trainers available on request.",
+    icon: "user",
+    photo: "/gallery/personal-training.jpg",
+  },
+  {
+    name: "Group Classes",
+    description:
+      "Yoga, Zumba, and Pilates in a dedicated 4,000 sq ft studio — no booking needed, just show up.",
+    icon: "users",
+    photo: "/gallery/group-classes.jpg",
+  },
+  {
+    name: "Functional Training & CrossFit",
+    description:
+      "HIIT and functional training in our dedicated rig area, for members who want high-intensity, varied workouts.",
+    icon: "star",
+    photo: "/gallery/functional-crossfit.jpg",
+  },
+  {
+    name: "Sports Injury Rehab",
+    photo: "/gallery/sports-rehab.jpg",
+    description:
+      "Recovery-focused training for athletes and anyone coming back from injury, with health history reviewed before you start.",
+    icon: "heart",
+  },
+]; // REAL — from the owner's approved submission (swapped Kids Fitness Academy for Functional Training/CrossFit since minimum age is 14)
+
+// PLACEHOLDER — replace with real member testimonials once collected.
+export const TESTIMONIALS = [
+  {
+    quote:
+      "The trainers actually pay attention. I've been coming for two years and my form has never been better.",
+    name: "Ananya R.",
+    role: "Member since 2023",
+  },
+  {
+    quote:
+      "The functional training zone is what keeps me coming back — always something different, never boring.",
+    name: "Suresh K.",
+    role: "Member since 2024",
+  },
+  {
+    quote:
+      "Came in for physio after a knee injury and stayed for the general gym. Genuinely feels like a community.",
+    name: "Priya M.",
+    role: "Member since 2022",
+  },
+];
+
+export const FACILITIES = [
+  "8,000 sq ft across 2 floors — 4,000 sq ft workout floor, 4,000 sq ft group class studio",
+  "Free parking on-site",
+  "Lockers, showers & changing rooms",
+  "Female trainers available for personal training",
+  "CCTV-monitored facility",
+  "Mobile app for tracking your workouts and diet",
+]; // REAL — from the owner's approved submission
+
+export const MEMBERSHIP_PLANS = [
+  { name: "Monthly", price: "₹2,500", note: "+ 5% GST" },
+  { name: "3 Months", price: "₹7,000", note: null },
+  { name: "6 Months", price: "₹10,000", note: null },
+];
+export const REGISTRATION_FEE = "₹500"; // one-time, lifetime membership registration
+export const FREE_TRIAL = "A free 1-day trial is available (minimum age 14)."; // REAL

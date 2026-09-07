@@ -1,0 +1,35 @@
+import { Reveal } from "./Reveal";
+import { AmbientGlow } from "./AmbientGlow";
+import { SectionHeading } from "./SectionHeading";
+import { TESTIMONIALS } from "@/lib/content";
+
+export function Testimonials() {
+  return (
+    <section id="testimonials" className="relative overflow-hidden bg-panel py-20">
+      <AmbientGlow side="left" />
+      <div className="relative mx-auto max-w-6xl px-5 sm:px-6 lg:px-8">
+        <SectionHeading
+          eyebrow="Members"
+          title="What people are saying"
+          description="Placeholder quotes — swap in real member testimonials before launch."
+        />
+
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {TESTIMONIALS.map((t, i) => (
+            <Reveal key={t.name} delay={i * 0.08}>
+              <figure className="relative h-full overflow-hidden rounded-2xl border border-line bg-paper p-6 transition-colors duration-300 hover:border-accent/40">
+                <span aria-hidden="true" className="absolute right-4 top-2 font-display text-6xl text-accent/10">
+                  &rdquo;
+                </span>
+                <blockquote className="relative text-sm leading-relaxed text-ink">&ldquo;{t.quote}&rdquo;</blockquote>
+                <figcaption className="relative mt-4 text-sm font-bold text-gold">
+                  {t.name} <span className="font-normal text-muted">— {t.role}</span>
+                </figcaption>
+              </figure>
+            </Reveal>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
