@@ -14,3 +14,16 @@ export function todayInGymTimezone(offsetDays = 0): string {
     instant
   );
 }
+
+// Parsing a date-only string as UTC noon (not local midnight, not UTC
+// midnight) sidesteps any timezone rollover when reading back the day index
+// or doing date arithmetic. Same idiom as the bot's lib/dateUtils.js.
+export function dayOfWeekForDateString(dateStr: string): number {
+  return new Date(`${dateStr}T12:00:00Z`).getUTCDay();
+}
+
+export function addDays(dateStr: string, days: number): string {
+  const d = new Date(`${dateStr}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
