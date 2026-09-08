@@ -1,7 +1,7 @@
 import { Reveal } from "./Reveal";
 import { AmbientGlow } from "./AmbientGlow";
 import { SectionHeading } from "./SectionHeading";
-import { TESTIMONIALS } from "@/lib/content";
+import { TESTIMONIALS, GOOGLE_RATING } from "@/lib/content";
 
 export function Testimonials() {
   return (
@@ -11,7 +11,7 @@ export function Testimonials() {
         <SectionHeading
           eyebrow="Members"
           title="What people are saying"
-          description="Placeholder quotes — swap in real member testimonials before launch."
+          description={`${GOOGLE_RATING.score}★ from ${GOOGLE_RATING.count} Google reviews — real member reviews, not marketing copy.`}
         />
 
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

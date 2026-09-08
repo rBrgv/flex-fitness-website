@@ -84,25 +84,27 @@ export const SERVICES: { name: string; description: string; icon: IconName; phot
   },
 ]; // REAL — from the owner's approved submission (swapped Kids Fitness Academy for Functional Training/CrossFit since minimum age is 14)
 
-// PLACEHOLDER — replace with real member testimonials once collected.
+export const GOOGLE_RATING = { score: 4.9, count: 144 };
+
+// Real reviews from the gym's Google Business listing.
 export const TESTIMONIALS = [
   {
     quote:
-      "The trainers actually pay attention. I've been coming for two years and my form has never been better.",
-    name: "Ananya R.",
-    role: "Member since 2023",
+      "I lost 10 kg with the help of our personal trainer Girish Sir. Am very happy — this is the best gym, everybody must visit this gym. Thanks to Flex Fitness by Nithish and my personal trainer.",
+    name: "Amulya Halady",
+    role: "Google review",
   },
   {
     quote:
-      "The functional training zone is what keeps me coming back — always something different, never boring.",
-    name: "Suresh K.",
-    role: "Member since 2024",
+      "The gym is well equipped and the trainers are always happy to help people seeking guidance. They also offer diverse classes like Zumba, yoga, Pilates etc. I would highly recommend the gym.",
+    name: "Tanuja Malatesha",
+    role: "Google review",
   },
   {
     quote:
-      "Came in for physio after a knee injury and stayed for the general gym. Genuinely feels like a community.",
-    name: "Priya M.",
-    role: "Member since 2022",
+      "Basava trainer is very dedicated and ensures we show up every day. Very motivating. I feel considerably fit since joining here.",
+    name: "Pratika Puranik",
+    role: "Google review",
   },
 ];
 
