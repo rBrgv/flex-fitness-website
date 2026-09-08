@@ -15,8 +15,16 @@ export const SITE = {
   neighborhood: "Gubbalala", // REAL
   city: "Bengaluru", // REAL
   whatsappNumber: "919019204104", // Testing number for now — owner will switch this to the real gym number (996440 6662) before launch
-  whatsappLink: "https://wa.me/919019204104",
+  // Prefilled text lets the bot tag leads.source on first contact (see
+  // lib/leads.js's detectSource in the bot repo) — every component sharing
+  // this constant gets tagged "website" with no per-component change needed.
+  whatsappLink: "https://wa.me/919019204104?text=" + encodeURIComponent("Hi! I'm interested in Flex Fitness."),
   whatsappTrialLink: "https://wa.me/919019204104?text=" + encodeURIComponent("Hi! I'd like to book a free trial at Flex Fitness."),
+  // Not used anywhere in this site — generated for pasting into external
+  // channels (Instagram bio, a printed pamphlet) so those leads get tagged
+  // correctly too, same detection mechanism.
+  instagramWhatsappLink: "https://wa.me/919019204104?text=" + encodeURIComponent("Hi! I saw you on Instagram."),
+  pamphletWhatsappLink: "https://wa.me/919019204104?text=" + encodeURIComponent("Hi! I saw your pamphlet."),
   memberCount: "500+", // REAL — active members (discovery call)
   transformationCount: "1,500+", // REAL — total health transformations (owner's approved submission)
   sqft: "8,000 sq ft across 2 floors", // REAL
