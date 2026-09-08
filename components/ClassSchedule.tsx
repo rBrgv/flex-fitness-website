@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Icon } from "./Icon";
 import { Reveal } from "./Reveal";
 import { AmbientGlow } from "./AmbientGlow";
@@ -78,7 +79,9 @@ export async function ClassSchedule() {
                       {dayClasses.map((c) => (
                         <li key={c.id} className="rounded-lg bg-panel-raised p-2">
                           <p className="text-[11px] font-bold text-gold">{formatTime(c.start_time)}</p>
-                          <p className="text-xs font-semibold leading-tight text-ink">{c.name}</p>
+                          <Link href={`/classes/${c.id}`} className="block text-xs font-semibold leading-tight text-ink hover:text-gold hover:underline">
+                            {c.name}
+                          </Link>
                           {trainerName(c) && <p className="mt-0.5 text-[11px] text-muted">{trainerName(c)}</p>}
                         </li>
                       ))}
