@@ -50,7 +50,15 @@ export function HeroBackground({ src }: { src: string }) {
         animate={reduceMotion ? undefined : { scale: [1, 1.09, 1] }}
         transition={{ duration: 22, repeat: Infinity, ease: "easeInOut" }}
       >
-        <Image src={src} alt="" fill priority className="object-cover" sizes="100vw" />
+        <Image
+          src={src}
+          alt=""
+          fill
+          priority
+          className="object-cover"
+          sizes="(min-width: 1600px) 1600px, 100vw"
+          quality={45}
+        />
       </motion.div>
 
       {/* Drifting, color-shifting light — echoes the real pink/purple neon in the photo */}
