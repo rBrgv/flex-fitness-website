@@ -15,7 +15,7 @@ export function Pricing() {
           description={`One-time registration of ${REGISTRATION_FEE}, then pick the plan that fits. ${FREE_TRIAL}`}
         />
 
-        <div className="grid gap-5 sm:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {MEMBERSHIP_PLANS.map((plan, i) => (
             <Reveal key={plan.name} delay={i * 0.08}>
               <div

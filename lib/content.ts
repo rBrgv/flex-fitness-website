@@ -175,6 +175,7 @@ export const MEMBERSHIP_PLANS = [
   { name: "Monthly", price: "₹2,500", note: "+ 5% GST" },
   { name: "3 Months", price: "₹7,000", note: null },
   { name: "6 Months", price: "₹10,000", note: null },
+  { name: "Yearly", price: "₹12,999", note: null },
 ];
 export const REGISTRATION_FEE = "₹500"; // one-time, lifetime membership registration
 export const FREE_TRIAL = "A free 1-day trial is available (minimum age 14)."; // REAL
