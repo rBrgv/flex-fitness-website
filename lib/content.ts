@@ -106,6 +106,60 @@ export const TESTIMONIALS = [
     name: "Pratika Puranik",
     role: "Google review",
   },
+  {
+    quote:
+      "Regular gym with huge space and new equipment added day by day as every trainers are friendly.",
+    name: "Ashwath S.",
+    role: "Google review",
+  },
+  {
+    quote:
+      "Just joined this gym and I'm already hooked! Love the energy in the group classes and the trainers are super supportive. Pushing me to be my best self. Highly recommend!",
+    name: "Anu Shree Deekshith",
+    role: "Google review",
+  },
+  {
+    quote:
+      "Thank you to the amazing team at Flex Fitness for helping me on my journey to transform my body and mind. Your expert guidance, support, and motivation have been invaluable. I'm grateful for the state-of-the-art facilities and inspiring atmosphere.",
+    name: "Shridhar BR",
+    role: "Google review",
+  },
+  {
+    quote:
+      "I have been doing my rehab with Nithish since a few months post my knee surgery. I feel far more confident than before and can see the difference. Both him and Shashi train well. Highly recommend.",
+    name: "Devipriya V.",
+    role: "Google review",
+  },
+  {
+    quote:
+      "Going to this gym from 3 months, great experience. All the equipments are well maintained. Interactive trainers and Nitesh is very helpful and awesome trainer. I enjoy all group classes a lot, especially Zumba and CrossFit.",
+    name: "Harini Prasannakumar",
+    role: "Google review",
+  },
+  {
+    quote:
+      "I've been training at this gym for more than six months, and it's been an incredible experience. The facilities are top-notch, and the environment is motivating. Special shoutout to Nitish and Santosh sir, who are phenomenal trainers.",
+    name: "Mahavir Shantilal Dhoka",
+    role: "Google review",
+  },
+  {
+    quote:
+      "The gym has a positive atmosphere. Trainers are professional and are very helpful with weights and machines. Also the gym is well maintained and people are respectful around. Highly recommended.",
+    name: "Roopali Vyas",
+    role: "Google review",
+  },
+  {
+    quote:
+      "Gym is amazing. It has all the equipment, neat and clean. Nitish is very humble and friendly. Gives equal attention to each person in gym and trains them based on their fitness level. Best in the locality.",
+    name: "Prerana Ojha",
+    role: "Google review",
+  },
+  {
+    quote:
+      "The trainers are not only knowledgeable but also highly considerate and helpful towards clients, including Nitish. The space itself is fantastic, equipped with advanced equipment, making everything an overall excellent experience.",
+    name: "Rajesh Yadav",
+    role: "Google review",
+  },
 ];
 
 export const FACILITIES = [

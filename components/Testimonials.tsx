@@ -1,7 +1,7 @@
 import { Reveal } from "./Reveal";
 import { AmbientGlow } from "./AmbientGlow";
 import { SectionHeading } from "./SectionHeading";
-import { TESTIMONIALS, GOOGLE_RATING } from "@/lib/content";
+import { TESTIMONIALS, GOOGLE_RATING, SITE } from "@/lib/content";
 
 export function Testimonials() {
   return (
@@ -29,6 +29,19 @@ export function Testimonials() {
             </Reveal>
           ))}
         </div>
+
+        <Reveal delay={TESTIMONIALS.length * 0.08}>
+          <div className="mt-10 text-center">
+            <a
+              href={SITE.mapsLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-bold text-gold transition-colors duration-300 hover:text-accent"
+            >
+              Read all {GOOGLE_RATING.count} reviews on Google →
+            </a>
+          </div>
+        </Reveal>
       </div>
     </section>
   );
