@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Link from "next/link";
 
 type Member = {
   name: string;
@@ -115,6 +116,15 @@ export function PortalDashboard({
             {checkinState === "done" && "✓ Checked in"}
             {checkinState === "already" && "✓ Already checked in today"}
           </button>
+        </div>
+
+        <div className="mb-6 grid grid-cols-2 gap-3">
+          <Link href="/portal/nutrition" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
+            Nutrition Plan
+          </Link>
+          <Link href="/portal/progress" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
+            Progress
+          </Link>
         </div>
 
         <div className="mb-6 rounded-2xl border border-line bg-panel p-6">

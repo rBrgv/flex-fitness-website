@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSessionTrainer } from "@/lib/trainerSession";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { todayInGymTimezone, dayOfWeekForDateString, addDays } from "@/lib/dateUtils";
@@ -78,6 +79,15 @@ export default async function TrainerSchedulePage() {
             <p className="text-sm text-muted">Your schedule this week</p>
           </div>
           <TrainerLogoutButton />
+        </div>
+
+        <div className="mb-6 flex gap-3">
+          <Link href="/trainer/clients" className="rounded-lg border border-line bg-panel px-4 py-2 text-sm font-bold text-ink hover:border-accent">
+            My Clients
+          </Link>
+          <Link href="/trainer/meal-plans" className="rounded-lg border border-line bg-panel px-4 py-2 text-sm font-bold text-ink hover:border-accent">
+            Meal Plan Templates
+          </Link>
         </div>
 
         {sessions.length === 0 ? (
