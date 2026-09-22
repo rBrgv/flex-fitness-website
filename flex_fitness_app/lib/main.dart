@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'api_client.dart';
-import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/member_shell.dart';
 import 'screens/trainer_home_screen.dart';
 
 // Exact brand colors from flex-fitness-website/app/globals.css — same look
@@ -110,7 +110,7 @@ class _SessionGateState extends State<SessionGate> {
       return const Scaffold(body: Center(child: CircularProgressIndicator(color: kGold)));
     }
     return switch (_mode) {
-      'member' => const HomeScreen(),
+      'member' => const MemberShell(),
       'trainer' => const TrainerHomeScreen(),
       _ => const LoginScreen(),
     };

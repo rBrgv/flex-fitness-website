@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../api_client.dart';
 import '../main.dart';
-import 'home_screen.dart';
+import 'member_shell.dart';
 import 'trainer_home_screen.dart';
 
 class OtpScreen extends StatefulWidget {
@@ -38,7 +38,7 @@ class _OtpScreenState extends State<OtpScreen> {
     await ApiClient.instance.saveLoginMode(widget.isTrainer ? 'trainer' : 'member');
     if (!mounted) return;
     Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => widget.isTrainer ? const TrainerHomeScreen() : const HomeScreen()),
+      MaterialPageRoute(builder: (_) => widget.isTrainer ? const TrainerHomeScreen() : const MemberShell()),
       (route) => false,
     );
   }

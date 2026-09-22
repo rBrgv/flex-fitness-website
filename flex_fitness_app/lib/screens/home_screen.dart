@@ -3,17 +3,16 @@ import 'package:intl/intl.dart';
 
 import '../api_client.dart';
 import '../main.dart';
-import 'classes_screen.dart';
 import 'login_screen.dart';
-import 'nutrition_screen.dart';
-import 'progress_screen.dart';
 import 'report_issue_screen.dart';
-import 'workouts_screen.dart';
 
 const _statusLabels = {'active': 'Active', 'frozen': 'Frozen', 'cancelled': 'Cancelled'};
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  // Set when this screen is hosted inside MemberShell's bottom-tab bar, so
+  // the "Book a class" link can switch tabs instead of pushing a new route.
+  final VoidCallback? onGoToClasses;
+  const HomeScreen({super.key, this.onGoToClasses});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -158,43 +157,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
 
             const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _NavCard(
-                    label: 'Book a Class',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClassesScreen())),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _NavCard(
-                    label: 'Workout Plan',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WorkoutsScreen())),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(
-                  child: _NavCard(
-                    label: 'Nutrition Plan',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionScreen())),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: _NavCard(
-                    label: 'Progress',
-                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ProgressScreen())),
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12),
             _Card(
               child: _freezeState == 'done'
                   ? const Text('Freeze request submitted — the team will review it shortly.', style: TextStyle(color: kMuted, fontSize: 13))
@@ -271,7 +233,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 10),
                   if (bookings.isEmpty)
                     GestureDetector(
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClassesScreen())),
+                      onTap: widget.onGoToClasses,
                       child: const Text.rich(
                         TextSpan(children: [
                           TextSpan(text: 'No upcoming bookings. ', style: TextStyle(color: kMuted, fontSize: 13)),
