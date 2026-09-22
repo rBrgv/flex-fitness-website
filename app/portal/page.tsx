@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSessionMember } from "@/lib/memberSession";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { todayInGymTimezone } from "@/lib/dateUtils";
+import { computeStreaks } from "@/lib/streak";
 import { PortalDashboard } from "@/components/PortalDashboard";
 
 export default async function PortalPage() {
@@ -26,11 +27,14 @@ export default async function PortalPage() {
       .select("checked_in_at")
       .eq("member_id", member.id)
       .order("checked_in_at", { ascending: false })
-      .limit(10),
+      .limit(400),
   ]);
+
+  const streak = computeStreaks((attendance || []).map((a) => a.checked_in_at));
 
   return (
     <PortalDashboard
+      streak={streak}
       member={{
         name: member.name,
         phone: member.phone,
@@ -45,7 +49,7 @@ export default async function PortalPage() {
         class_date: b.class_date as string,
         classes: Array.isArray(b.classes) ? b.classes[0] || null : b.classes,
       }))}
-      attendance={attendance || []}
+      attendance={(attendance || []).slice(0, 10)}
     />
   );
 }

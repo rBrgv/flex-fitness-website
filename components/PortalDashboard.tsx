@@ -22,6 +22,7 @@ type Booking = {
   classes: { name: string; start_time: string; end_time: string } | null;
 };
 type AttendanceRow = { checked_in_at: string };
+type Streak = { current: number; longest: number };
 
 const STATUS_LABEL: Record<string, string> = {
   active: "Active",
@@ -115,14 +116,17 @@ export function PortalDashboard({
   member,
   bookings,
   attendance,
+  streak,
 }: {
   member: Member;
   bookings: Booking[];
   attendance: AttendanceRow[];
+  streak: Streak;
 }) {
   const router = useRouter();
   const [checkinState, setCheckinState] = useState<"idle" | "loading" | "done" | "already" | "error">("idle");
   const [confirmedAttendance, setConfirmedAttendance] = useState(attendance);
+  const [streakState, setStreakState] = useState(streak);
 
   async function handleCheckin() {
     setCheckinState("loading");
@@ -133,6 +137,9 @@ export function PortalDashboard({
       setCheckinState(data.alreadyCheckedIn ? "already" : "done");
       if (!data.alreadyCheckedIn) {
         setConfirmedAttendance(previous => [{ checked_in_at: data.checkedInAt || new Date().toISOString() }, ...previous].slice(0, 10));
+        // Optimistic — the streak fetched on page load already accounts for
+        // continuity through yesterday, so today's check-in simply extends it.
+        setStreakState((prev) => ({ current: prev.current + 1, longest: Math.max(prev.longest, prev.current + 1) }));
       }
     } catch {
       setCheckinState("error");
@@ -197,6 +204,12 @@ export function PortalDashboard({
         <div className="mb-6 rounded-2xl border border-line bg-panel p-6">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-sm font-bold uppercase tracking-wide text-muted">Today</span>
+            {streakState.current > 0 && (
+              <span className="text-sm font-bold text-gold">
+                🔥 {streakState.current} day{streakState.current === 1 ? "" : "s"}
+                {streakState.longest > streakState.current && <span className="text-muted"> · best {streakState.longest}</span>}
+              </span>
+            )}
           </div>
           <button
             onClick={handleCheckin}

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionMember } from "@/lib/memberSession";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { todayInGymTimezone } from "@/lib/dateUtils";
+import { computeStreaks } from "@/lib/streak";
 
 // JSON twin of app/portal/page.tsx's data-fetching — same queries, same
 // auth guard, just returned as JSON instead of rendered server-side.
@@ -24,13 +25,18 @@ export async function GET() {
       .eq("member_id", member.id)
       .gte("class_date", today)
       .order("class_date", { ascending: true }),
+    // 400 rows is far more than any real streak needs, but cheap enough to
+    // just fetch outright rather than compute a streak via a second
+    // query — one query serves both the display list and the streak.
     supabase
       .from("attendance")
       .select("checked_in_at")
       .eq("member_id", member.id)
       .order("checked_in_at", { ascending: false })
-      .limit(10),
+      .limit(400),
   ]);
+
+  const streak = computeStreaks((attendance || []).map((a) => a.checked_in_at));
 
   return NextResponse.json({
     ok: true,
@@ -48,6 +54,7 @@ export async function GET() {
       class_date: b.class_date,
       classes: Array.isArray(b.classes) ? b.classes[0] || null : b.classes,
     })),
-    attendance: attendance || [],
+    attendance: (attendance || []).slice(0, 10),
+    streak,
   });
 }

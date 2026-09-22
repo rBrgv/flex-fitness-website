@@ -45,8 +45,16 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _checkin() async {
     setState(() => _checkinState = 'loading');
     final res = await ApiClient.instance.checkin();
+    final alreadyCheckedIn = res.data['alreadyCheckedIn'] == true;
     setState(() {
-      _checkinState = (res.data['alreadyCheckedIn'] == true) ? 'already' : 'done';
+      _checkinState = alreadyCheckedIn ? 'already' : 'done';
+      if (!alreadyCheckedIn) {
+        // Optimistic — the streak from the last load already accounts for
+        // continuity through yesterday, so today's check-in extends it.
+        final streak = _data!['streak'] as Map<String, dynamic>;
+        final newCurrent = (streak['current'] as int) + 1;
+        _data!['streak'] = {'current': newCurrent, 'longest': newCurrent > streak['longest'] ? newCurrent : streak['longest']};
+      }
     });
   }
 
@@ -117,6 +125,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final trainerName = _data!['trainer_name'] as String?;
     final bookings = (_data!['bookings'] as List).cast<Map<String, dynamic>>();
     final attendance = (_data!['attendance'] as List).cast<Map<String, dynamic>>();
+    final streak = _data!['streak'] as Map<String, dynamic>;
+    final streakCurrent = streak['current'] as int;
+    final streakLongest = streak['longest'] as int;
 
     return Scaffold(
       appBar: AppBar(
@@ -206,7 +217,17 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('TODAY', style: TextStyle(color: kMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text('TODAY', style: TextStyle(color: kMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                      if (streakCurrent > 0)
+                        Text(
+                          '🔥 $streakCurrent day${streakCurrent == 1 ? '' : 's'}${streakLongest > streakCurrent ? ' · best $streakLongest' : ''}',
+                          style: const TextStyle(color: kGold, fontSize: 13, fontWeight: FontWeight.bold),
+                        ),
+                    ],
+                  ),
                   const SizedBox(height: 10),
                   SizedBox(
                     width: double.infinity,

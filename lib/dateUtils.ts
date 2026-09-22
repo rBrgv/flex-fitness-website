@@ -27,3 +27,18 @@ export function addDays(dateStr: string, days: number): string {
   d.setUTCDate(d.getUTCDate() + days);
   return d.toISOString().slice(0, 10);
 }
+
+// Same gym-timezone reasoning as todayInGymTimezone, but for an arbitrary
+// instant (e.g. an attendance row's checked_in_at) instead of "now".
+export function dateInGymTimezone(instant: Date | string): string {
+  const d = typeof instant === "string" ? new Date(instant) : instant;
+  return new Intl.DateTimeFormat("en-CA", { timeZone: GYM_TIMEZONE, year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+}
+
+// Whole-day difference between two YYYY-MM-DD strings (b - a), using the
+// same noon-UTC anchoring idiom as addDays to sidestep DST/rollover.
+export function daysBetween(a: string, b: string): number {
+  const da = new Date(`${a}T12:00:00Z`).getTime();
+  const db = new Date(`${b}T12:00:00Z`).getTime();
+  return Math.round((db - da) / 86400000);
+}
