@@ -7,6 +7,8 @@ import 'classes_screen.dart';
 import 'login_screen.dart';
 import 'nutrition_screen.dart';
 import 'progress_screen.dart';
+import 'report_issue_screen.dart';
+import 'workouts_screen.dart';
 
 const _statusLabels = {'active': 'Active', 'frozen': 'Frozen', 'cancelled': 'Cancelled'};
 
@@ -21,6 +23,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Map<String, dynamic>? _data;
   bool _loading = true;
   String _checkinState = 'idle'; // idle | loading | done | already
+  bool _freezeOpen = false;
+  final _freezeReasonController = TextEditingController();
+  String _freezeState = 'idle'; // idle | saving | done
+  String? _freezeError;
 
   @override
   void initState() {
@@ -43,6 +49,23 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       _checkinState = (res.data['alreadyCheckedIn'] == true) ? 'already' : 'done';
     });
+  }
+
+  Future<void> _submitFreeze() async {
+    setState(() {
+      _freezeError = null;
+      _freezeState = 'saving';
+    });
+    final reason = _freezeReasonController.text.trim();
+    final res = await ApiClient.instance.requestFreeze(reason.isEmpty ? null : reason);
+    if (!res.ok) {
+      setState(() {
+        _freezeState = 'idle';
+        _freezeError = res.error ?? 'Could not submit the request.';
+      });
+      return;
+    }
+    setState(() => _freezeState = 'done');
   }
 
   Future<void> _logout() async {
@@ -146,6 +169,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: _NavCard(
+                    label: 'Workout Plan',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const WorkoutsScreen())),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _NavCard(
                     label: 'Nutrition Plan',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionScreen())),
                   ),
@@ -158,6 +192,51 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
               ],
+            ),
+
+            const SizedBox(height: 12),
+            _Card(
+              child: _freezeState == 'done'
+                  ? const Text('Freeze request submitted — the team will review it shortly.', style: TextStyle(color: kMuted, fontSize: 13))
+                  : !_freezeOpen
+                      ? InkWell(
+                          onTap: () => setState(() => _freezeOpen = true),
+                          child: const Center(child: Text('Request a Membership Freeze', style: TextStyle(color: kInk, fontWeight: FontWeight.bold, fontSize: 13))),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text('REQUEST A FREEZE', style: TextStyle(color: kMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                            const SizedBox(height: 8),
+                            TextField(
+                              controller: _freezeReasonController,
+                              maxLines: 2,
+                              style: const TextStyle(color: kInk),
+                              decoration: const InputDecoration(labelText: 'Reason (optional)', labelStyle: TextStyle(color: kMuted)),
+                            ),
+                            if (_freezeError != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(_freezeError!, style: const TextStyle(color: Colors.redAccent, fontSize: 12))),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                ElevatedButton(
+                                  onPressed: _freezeState == 'saving' ? null : _submitFreeze,
+                                  child: Text(_freezeState == 'saving' ? 'Submitting…' : 'Submit request'),
+                                ),
+                                const SizedBox(width: 12),
+                                TextButton(
+                                  onPressed: () => setState(() => _freezeOpen = false),
+                                  child: const Text('Cancel', style: TextStyle(color: kMuted)),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+            ),
+
+            const SizedBox(height: 12),
+            _NavCard(
+              label: 'Report a Facility Issue',
+              onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ReportIssueScreen())),
             ),
 
             const SizedBox(height: 12),

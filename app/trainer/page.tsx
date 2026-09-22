@@ -100,6 +100,9 @@ export default async function TrainerSchedulePage() {
           <Link href="/trainer/meal-plans" className="rounded-lg border border-line bg-panel px-4 py-2 text-sm font-bold text-ink hover:border-accent">
             Meal Plan Templates
           </Link>
+          <Link href="/trainer/workout-plans" className="rounded-lg border border-line bg-panel px-4 py-2 text-sm font-bold text-ink hover:border-accent">
+            Workout Plan Templates
+          </Link>
         </div>
 
         <details className="mb-6 rounded-xl border border-line p-4 text-sm">

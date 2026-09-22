@@ -21,6 +21,21 @@ type ActiveAssignment = {
 
 type Template = { id: string; title: string };
 
+type WorkoutExercise = {
+  day_label: string;
+  name: string;
+  sets: number | null;
+  reps: string | null;
+  rest_seconds: number | null;
+};
+
+type ActiveWorkoutAssignment = {
+  id: string;
+  start_date: string;
+  end_date: string | null;
+  plan: { id: string; title: string; goal_type: string | null; workout_plan_exercises: WorkoutExercise[] } | null;
+};
+
 type ProgressLog = {
   id: string;
   log_date: string;
@@ -57,6 +72,19 @@ function groupByMeal(items: MealItem[]) {
   return MEAL_ORDER.filter((t) => groups[t]?.length).map((t) => ({ type: t, items: groups[t] }));
 }
 
+function groupByDay(exercises: WorkoutExercise[]) {
+  const groups: Record<string, WorkoutExercise[]> = {};
+  const order: string[] = [];
+  for (const ex of exercises) {
+    if (!groups[ex.day_label]) {
+      groups[ex.day_label] = [];
+      order.push(ex.day_label);
+    }
+    groups[ex.day_label].push(ex);
+  }
+  return order.map((day) => ({ day, exercises: groups[day] }));
+}
+
 const MEASUREMENT_FIELDS: { key: keyof ProgressLog; label: string; unit: string }[] = [
   { key: "weight_kg", label: "Weight", unit: "kg" },
   { key: "body_fat_percentage", label: "Body fat", unit: "%" },
@@ -72,12 +100,16 @@ export function TrainerClientDetail({
   memberId,
   activeAssignment,
   templates,
+  activeWorkoutAssignment,
+  workoutTemplates,
   logs,
   photos,
 }: {
   memberId: string;
   activeAssignment: ActiveAssignment | null;
   templates: Template[];
+  activeWorkoutAssignment: ActiveWorkoutAssignment | null;
+  workoutTemplates: Template[];
   logs: ProgressLog[];
   photos: ProgressPhoto[];
 }) {
@@ -87,6 +119,12 @@ export function TrainerClientDetail({
   const [assignState, setAssignState] = useState<"idle" | "saving">("idle");
   const [endState, setEndState] = useState<"idle" | "saving">("idle");
   const [error, setError] = useState("");
+
+  const [selectedWorkoutTemplate, setSelectedWorkoutTemplate] = useState(workoutTemplates[0]?.id || "");
+  const [workoutStartDate, setWorkoutStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [workoutAssignState, setWorkoutAssignState] = useState<"idle" | "saving">("idle");
+  const [workoutEndState, setWorkoutEndState] = useState<"idle" | "saving">("idle");
+  const [workoutError, setWorkoutError] = useState("");
 
   async function handleAssign() {
     setError("");
@@ -114,6 +152,35 @@ export function TrainerClientDetail({
     const data = await res.json();
     setEndState("idle");
     if (!data.ok) return setError(data.error || "Could not end the plan.");
+    router.refresh();
+  }
+
+  async function handleAssignWorkout() {
+    setWorkoutError("");
+    if (!selectedWorkoutTemplate) return setWorkoutError("Pick a template first.");
+    setWorkoutAssignState("saving");
+    const res = await fetch("/api/trainer/workout-assignments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ member_id: memberId, workout_plan_id: selectedWorkoutTemplate, start_date: workoutStartDate }),
+    });
+    const data = await res.json();
+    setWorkoutAssignState("idle");
+    if (!data.ok) return setWorkoutError(data.error || "Could not assign the plan.");
+    router.refresh();
+  }
+
+  async function handleEndWorkoutPlan() {
+    if (!activeWorkoutAssignment) return;
+    setWorkoutEndState("saving");
+    const res = await fetch(`/api/trainer/workout-assignments/${activeWorkoutAssignment.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ is_active: false }),
+    });
+    const data = await res.json();
+    setWorkoutEndState("idle");
+    if (!data.ok) return setWorkoutError(data.error || "Could not end the plan.");
     router.refresh();
   }
 
@@ -188,6 +255,80 @@ export function TrainerClientDetail({
             </button>
           </div>
           {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
+        </div>
+      </div>
+
+      <div className="rounded-2xl border border-line bg-panel p-6">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-sm font-bold uppercase tracking-wide text-muted">Workout Plan</span>
+          {activeWorkoutAssignment && (
+            <button
+              onClick={handleEndWorkoutPlan}
+              disabled={workoutEndState === "saving"}
+              className="text-xs font-bold text-muted hover:text-ink disabled:opacity-60"
+            >
+              {workoutEndState === "saving" ? "Ending…" : "End plan"}
+            </button>
+          )}
+        </div>
+
+        {activeWorkoutAssignment?.plan ? (
+          <div>
+            <p className="mb-1 text-base font-bold text-ink">{activeWorkoutAssignment.plan.title}</p>
+            <p className="mb-3 text-xs text-muted">
+              Since {formatDate(activeWorkoutAssignment.start_date)}
+              {activeWorkoutAssignment.end_date && ` · ends ${formatDate(activeWorkoutAssignment.end_date)}`}
+            </p>
+            <div className="flex flex-col gap-3">
+              {groupByDay(activeWorkoutAssignment.plan.workout_plan_exercises).map((group) => (
+                <div key={group.day}>
+                  <p className="mb-1 text-xs font-bold uppercase tracking-wide text-gold">{group.day}</p>
+                  <ul className="flex flex-col gap-1">
+                    {group.exercises.map((ex, i) => (
+                      <li key={i} className="text-sm text-ink">
+                        {ex.name}
+                        {(ex.sets || ex.reps) && (
+                          <span className="text-muted"> — {[ex.sets && `${ex.sets} sets`, ex.reps && `${ex.reps} reps`].filter(Boolean).join(" · ")}</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          <p className="mb-4 text-sm text-muted">No active plan.</p>
+        )}
+
+        <div className="mt-4 border-t border-line pt-4">
+          <p className="mb-2 text-xs font-bold uppercase tracking-wide text-muted">Assign a plan</p>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <select
+              value={selectedWorkoutTemplate}
+              onChange={(e) => setSelectedWorkoutTemplate(e.target.value)}
+              className="flex-1 rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink"
+            >
+              {workoutTemplates.length === 0 && <option value="">No templates yet</option>}
+              {workoutTemplates.map((t) => (
+                <option key={t.id} value={t.id}>{t.title}</option>
+              ))}
+            </select>
+            <input
+              type="date"
+              value={workoutStartDate}
+              onChange={(e) => setWorkoutStartDate(e.target.value)}
+              className="rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink"
+            />
+            <button
+              onClick={handleAssignWorkout}
+              disabled={workoutAssignState === "saving" || workoutTemplates.length === 0}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-paper disabled:opacity-60"
+            >
+              {workoutAssignState === "saving" ? "Assigning…" : "Assign"}
+            </button>
+          </div>
+          {workoutError && <p className="mt-2 text-xs text-red-400">{workoutError}</p>}
         </div>
       </div>
 

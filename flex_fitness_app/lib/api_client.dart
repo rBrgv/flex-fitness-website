@@ -79,6 +79,10 @@ class ApiClient {
 
   Future<ApiResult> getNutrition() => _get('/api/portal/nutrition');
 
+  Future<ApiResult> getWorkouts() => _get('/api/portal/workouts');
+
+  Future<ApiResult> requestFreeze(String? reason) => _post('/api/portal/freeze', {'reason': reason});
+
   Future<ApiResult> getBookableClasses() => _get('/api/portal/classes');
 
   Future<ApiResult> bookClass(String classId, String date) =>
@@ -104,6 +108,20 @@ class ApiClient {
       return _fromResponse(res);
     } catch (e) {
       return ApiResult(ok: false, error: 'Could not upload the photo.');
+    }
+  }
+
+  Future<ApiResult> submitFacilityReport({String? description, bool urgent = false, File? photo}) async {
+    try {
+      final form = FormData.fromMap({
+        'description': ?description,
+        'severity': urgent ? 'urgent' : 'normal',
+        if (photo != null) 'file': await MultipartFile.fromFile(photo.path, filename: photo.path.split('/').last),
+      });
+      final res = await _dio.post('/api/portal/facility-report', data: form);
+      return _fromResponse(res);
+    } catch (e) {
+      return ApiResult(ok: false, error: 'Could not submit the report.');
     }
   }
 }

@@ -24,6 +24,24 @@ type AssignmentRow = {
   } | null;
 };
 
+type WorkoutAssignmentRow = {
+  id: string;
+  start_date: string;
+  end_date: string | null;
+  workout_plans: {
+    id: string;
+    title: string;
+    goal_type: string | null;
+    workout_plan_exercises: {
+      day_label: string;
+      name: string;
+      sets: number | null;
+      reps: string | null;
+      rest_seconds: number | null;
+    }[];
+  } | null;
+};
+
 export default async function TrainerClientDetailPage({ params }: { params: Promise<{ memberId: string }> }) {
   const trainer = await getSessionTrainer();
   if (!trainer) redirect("/trainer/login");
@@ -40,7 +58,7 @@ export default async function TrainerClientDetailPage({ params }: { params: Prom
   // Ownership check — a trainer may only view their own assigned members.
   if (!member || member.trainer_id !== trainer.id) notFound();
 
-  const [{ data: assignment }, { data: templates }, { data: logs }, { data: photos }] = await Promise.all([
+  const [{ data: assignment }, { data: templates }, { data: workoutAssignment }, { data: workoutTemplates }, { data: logs }, { data: photos }] = await Promise.all([
     supabase
       .from("member_meal_plan_assignments")
       .select("id, start_date, end_date, meal_plans(id, title, goal_type, meal_plan_items(meal_type, name, calories, protein_g, carbs_g, fats_g))")
@@ -48,6 +66,13 @@ export default async function TrainerClientDetailPage({ params }: { params: Prom
       .eq("is_active", true)
       .maybeSingle(),
     supabase.from("meal_plans").select("id, title").order("title", { ascending: true }),
+    supabase
+      .from("member_workout_plan_assignments")
+      .select("id, start_date, end_date, workout_plans(id, title, goal_type, workout_plan_exercises(day_label, name, sets, reps, rest_seconds))")
+      .eq("member_id", memberId)
+      .eq("is_active", true)
+      .maybeSingle(),
+    supabase.from("workout_plans").select("id, title").order("title", { ascending: true }),
     supabase
       .from("progress_logs")
       .select("*")
@@ -77,6 +102,7 @@ export default async function TrainerClientDetailPage({ params }: { params: Prom
   }
 
   const activeAssignment = assignment as AssignmentRow | null;
+  const activeWorkoutAssignment = workoutAssignment as WorkoutAssignmentRow | null;
 
   return (
     <main className="min-h-screen bg-paper px-5 py-10">
@@ -106,6 +132,17 @@ export default async function TrainerClientDetailPage({ params }: { params: Prom
               : null
           }
           templates={templates || []}
+          activeWorkoutAssignment={
+            activeWorkoutAssignment
+              ? {
+                  id: activeWorkoutAssignment.id,
+                  start_date: activeWorkoutAssignment.start_date,
+                  end_date: activeWorkoutAssignment.end_date,
+                  plan: activeWorkoutAssignment.workout_plans,
+                }
+              : null
+          }
+          workoutTemplates={workoutTemplates || []}
           logs={logs || []}
           photos={signedPhotos}
         />

@@ -45,6 +45,72 @@ function daysUntil(date: string) {
   return Math.round((end.getTime() - today.getTime()) / 86_400_000);
 }
 
+function FreezeRequestCard() {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("");
+  const [state, setState] = useState<"idle" | "saving" | "done">("idle");
+  const [error, setError] = useState("");
+
+  async function handleSubmit() {
+    setError("");
+    setState("saving");
+    const res = await fetch("/api/portal/freeze", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reason: reason || null }),
+    });
+    const data = await res.json();
+    if (!data.ok) {
+      setState("idle");
+      setError(data.message || "Could not submit the request.");
+      return;
+    }
+    setState("done");
+  }
+
+  if (state === "done") {
+    return (
+      <div className="mb-6 rounded-2xl border border-line bg-panel p-4 text-center text-sm text-muted">
+        Freeze request submitted — the team will review it shortly.
+      </div>
+    );
+  }
+
+  return (
+    <div className="mb-6 rounded-2xl border border-line bg-panel p-4">
+      {!open ? (
+        <button onClick={() => setOpen(true)} className="w-full text-center text-sm font-bold text-ink hover:text-gold">
+          Request a Membership Freeze
+        </button>
+      ) : (
+        <div>
+          <span className="mb-2 block text-sm font-bold uppercase tracking-wide text-muted">Request a Freeze</span>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Reason (optional)"
+            rows={2}
+            className="mb-2 w-full rounded-lg border border-line bg-paper px-3 py-2 text-sm text-ink"
+          />
+          {error && <p className="mb-2 text-xs text-red-400">{error}</p>}
+          <div className="flex gap-2">
+            <button
+              onClick={handleSubmit}
+              disabled={state === "saving"}
+              className="rounded-lg bg-accent px-4 py-2 text-sm font-bold text-paper disabled:opacity-60"
+            >
+              {state === "saving" ? "Submitting…" : "Submit request"}
+            </button>
+            <button onClick={() => setOpen(false)} className="text-sm font-bold text-muted hover:text-ink">
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function PortalDashboard({
   member,
   bookings,
@@ -146,9 +212,12 @@ export function PortalDashboard({
           {checkinState === "error" && <p className="mt-3 text-center text-xs text-red-400">Check-in didn&apos;t work. Please try again or message the gym.</p>}
         </div>
 
-        <div className="mb-6 grid grid-cols-3 gap-3">
+        <div className="mb-6 grid grid-cols-2 gap-3">
           <Link href="/portal/classes" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
             Book a Class
+          </Link>
+          <Link href="/portal/workouts" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
+            Workout Plan
           </Link>
           <Link href="/portal/nutrition" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
             Nutrition Plan
@@ -157,6 +226,12 @@ export function PortalDashboard({
             Progress
           </Link>
         </div>
+
+        <FreezeRequestCard />
+
+        <Link href="/portal/report-issue" className="mb-6 block rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
+          Report a Facility Issue
+        </Link>
 
         <a href={SITE.whatsappLink} className="mb-6 block rounded-2xl border border-gold/40 bg-accent/10 p-4 text-center text-sm font-bold text-gold hover:border-gold">
           Need help? Message us

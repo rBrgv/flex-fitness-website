@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { SITE } from "@/lib/content";
 
-type PortalSection = "home" | "nutrition" | "progress" | "classes";
+type PortalSection = "home" | "nutrition" | "progress" | "classes" | "workouts";
 
 const items: { key: PortalSection; href: string; label: string; icon: string }[] = [
   { key: "home", href: "/portal", label: "Home", icon: "⌂" },
   { key: "classes", href: "/portal/classes", label: "Classes", icon: "▤" },
+  { key: "workouts", href: "/portal/workouts", label: "Workouts", icon: "◆" },
   { key: "nutrition", href: "/portal/nutrition", label: "Nutrition", icon: "◎" },
   { key: "progress", href: "/portal/progress", label: "Progress", icon: "↗" },
 ];
@@ -13,7 +14,7 @@ const items: { key: PortalSection; href: string; label: string; icon: string }[]
 export function PortalNav({ active }: { active: PortalSection }) {
   return (
     <nav aria-label="Member portal" className="fixed inset-x-0 bottom-0 z-50 border-t border-line bg-paper/95 px-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-2 backdrop-blur sm:bottom-4 sm:left-1/2 sm:right-auto sm:w-[420px] sm:-translate-x-1/2 sm:rounded-2xl sm:border">
-      <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+      <div className="mx-auto grid max-w-md grid-cols-6 gap-1">
         {items.map((item) => {
           const selected = active === item.key;
           return (
