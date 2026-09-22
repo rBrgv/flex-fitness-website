@@ -41,30 +41,45 @@ function nextOccurrences(dayOfWeek: number, count = 7) {
 // implementation both the website page and the Flutter app read through
 // the /api/portal/classes route.
 export async function listBookableClasses(member: Member): Promise<{ enabled: boolean; classes: BookableClass[] }> {
-  const enabled = await isFeatureEnabled("class_booking");
-  if (!enabled) return { enabled: false, classes: [] };
-
   const supabase = getSupabaseServer();
-  const { data: classes } = await supabase.from("classes").select("*").eq("active", true);
-  if (!classes) return { enabled, classes: [] };
+  const today = todayInGymTimezone();
+  const windowEnd = addDays(today, 6);
 
-  const { data: myBookings } = await supabase
+  // These three don't depend on each other — run in parallel instead of
+  // one sequential round-trip after another.
+  const [enabled, { data: classes }, { data: myBookings }] = await Promise.all([
+    isFeatureEnabled("class_booking"),
+    supabase.from("classes").select("*").eq("active", true),
+    supabase.from("class_bookings").select("class_id, class_date").eq("member_id", member.id).gte("class_date", today),
+  ]);
+  if (!enabled) return { enabled: false, classes: [] };
+  if (!classes || classes.length === 0) return { enabled, classes: [] };
+
+  const myBookingKeys = new Set((myBookings || []).map((b) => `${b.class_id}:${b.class_date}`));
+
+  // The N+1 fix: one query for every booking across every class in the
+  // whole 7-day window, instead of a separate count query per class per
+  // day (was up to classes.length * 7 sequential round-trips).
+  const classIds = (classes as ClassRow[]).map((c) => c.id);
+  const { data: windowBookings } = await supabase
     .from("class_bookings")
     .select("class_id, class_date")
-    .eq("member_id", member.id)
-    .gte("class_date", todayInGymTimezone());
-  const myBookingKeys = new Set((myBookings || []).map((b) => `${b.class_id}:${b.class_date}`));
+    .in("class_id", classIds)
+    .gte("class_date", today)
+    .lte("class_date", windowEnd);
+
+  const countByKey = new Map<string, number>();
+  for (const b of windowBookings || []) {
+    const key = `${b.class_id}:${b.class_date}`;
+    countByKey.set(key, (countByKey.get(key) || 0) + 1);
+  }
 
   const results: BookableClass[] = [];
   for (const c of classes as ClassRow[]) {
     for (const date of nextOccurrences(c.day_of_week, 7)) {
-      const { count } = await supabase
-        .from("class_bookings")
-        .select("id", { count: "exact", head: true })
-        .eq("class_id", c.id)
-        .eq("class_date", date);
-      const spotsLeft = c.capacity - (count || 0);
-      const alreadyBooked = myBookingKeys.has(`${c.id}:${date}`);
+      const key = `${c.id}:${date}`;
+      const spotsLeft = c.capacity - (countByKey.get(key) || 0);
+      const alreadyBooked = myBookingKeys.has(key);
       if (spotsLeft > 0 || alreadyBooked) {
         results.push({
           class_id: c.id,
