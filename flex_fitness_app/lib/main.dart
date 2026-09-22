@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'api_client.dart';
 import 'screens/home_screen.dart';
 import 'screens/login_screen.dart';
+import 'screens/trainer_home_screen.dart';
 
 // Exact brand colors from flex-fitness-website/app/globals.css — same look
 // as the web portal.
@@ -74,7 +75,8 @@ class SessionGate extends StatefulWidget {
 
 class _SessionGateState extends State<SessionGate> {
   bool _checked = false;
-  bool _loggedIn = false;
+  // idle | member | trainer
+  String _mode = 'idle';
 
   @override
   void initState() {
@@ -83,9 +85,21 @@ class _SessionGateState extends State<SessionGate> {
   }
 
   Future<void> _check() async {
-    final res = await ApiClient.instance.getMe();
+    final preferred = await ApiClient.instance.getLoginMode();
+    final preferredOk = preferred == 'trainer' ? await ApiClient.instance.getTrainerMe() : await ApiClient.instance.getMe();
+    if (preferredOk.ok) {
+      setState(() {
+        _mode = preferred;
+        _checked = true;
+      });
+      return;
+    }
+
+    // Stale/mismatched local flag — try the other mode before giving up.
+    final other = preferred == 'trainer' ? 'member' : 'trainer';
+    final otherOk = other == 'trainer' ? await ApiClient.instance.getTrainerMe() : await ApiClient.instance.getMe();
     setState(() {
-      _loggedIn = res.ok;
+      _mode = otherOk.ok ? other : 'idle';
       _checked = true;
     });
   }
@@ -95,6 +109,10 @@ class _SessionGateState extends State<SessionGate> {
     if (!_checked) {
       return const Scaffold(body: Center(child: CircularProgressIndicator(color: kGold)));
     }
-    return _loggedIn ? const HomeScreen() : const LoginScreen();
+    return switch (_mode) {
+      'member' => const HomeScreen(),
+      'trainer' => const TrainerHomeScreen(),
+      _ => const LoginScreen(),
+    };
   }
 }

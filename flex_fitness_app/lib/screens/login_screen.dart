@@ -14,6 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _phoneController = TextEditingController();
   bool _loading = false;
+  bool _isTrainer = false;
   String? _error;
 
   Future<void> _submit() async {
@@ -26,14 +27,14 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     setState(() => _loading = true);
-    final res = await ApiClient.instance.requestOtp(phone);
+    final res = _isTrainer ? await ApiClient.instance.requestTrainerOtp(phone) : await ApiClient.instance.requestOtp(phone);
     setState(() => _loading = false);
     if (!res.ok) {
       setState(() => _error = res.error ?? 'Could not send the code.');
       return;
     }
     if (!mounted) return;
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => OtpScreen(phone: phone)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => OtpScreen(phone: phone, isTrainer: _isTrainer)));
   }
 
   @override
@@ -52,13 +53,18 @@ class _LoginScreenState extends State<LoginScreen> {
                   textAlign: TextAlign.center,
                   style: TextStyle(color: kInk, fontSize: 28, fontWeight: FontWeight.bold, letterSpacing: 1),
                 ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Member Login',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: kMuted, fontSize: 14),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(color: kPanel, borderRadius: BorderRadius.circular(12), border: Border.all(color: kLine)),
+                  child: Row(
+                    children: [
+                      Expanded(child: _ModeTab(label: 'Member', selected: !_isTrainer, onTap: () => setState(() => _isTrainer = false))),
+                      Expanded(child: _ModeTab(label: 'Trainer', selected: _isTrainer, onTap: () => setState(() => _isTrainer = true))),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 32),
+                const SizedBox(height: 24),
                 TextField(
                   controller: _phoneController,
                   keyboardType: TextInputType.phone,
@@ -84,6 +90,30 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ModeTab extends StatelessWidget {
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _ModeTab({required this.label, required this.selected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(9),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 10),
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: selected ? kGold.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(9),
+        ),
+        child: Text(label, style: TextStyle(color: selected ? kGold : kMuted, fontWeight: FontWeight.bold, fontSize: 13)),
       ),
     );
   }

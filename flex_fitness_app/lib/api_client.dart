@@ -4,6 +4,7 @@ import 'package:cookie_jar/cookie_jar.dart';
 import 'package:dio/dio.dart';
 import 'package:dio_cookie_manager/dio_cookie_manager.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Same server the website (flex-fitness-website) talks to — this app is a
 // thin client over its existing API routes, not a separate backend.
@@ -66,12 +67,89 @@ class ApiClient {
     }
   }
 
+  Future<ApiResult> _patch(String path, [Map<String, dynamic>? body]) async {
+    try {
+      final res = await _dio.patch(path, data: body);
+      return _fromResponse(res);
+    } catch (e) {
+      return ApiResult(ok: false, error: 'Network error — please check your connection.');
+    }
+  }
+
+  Future<ApiResult> _delete(String path) async {
+    try {
+      final res = await _dio.delete(path);
+      return _fromResponse(res);
+    } catch (e) {
+      return ApiResult(ok: false, error: 'Network error — please check your connection.');
+    }
+  }
+
+  // Persists which portal the last successful login used, so the app knows
+  // which /api/*/me to check first on cold start instead of guessing.
+  Future<void> saveLoginMode(String mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('login_mode', mode);
+  }
+
+  Future<String> getLoginMode() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('login_mode') ?? 'member';
+  }
+
   Future<ApiResult> requestOtp(String phone) => _post('/api/member-auth/request-otp', {'phone': phone});
 
   Future<ApiResult> verifyOtp(String phone, String code) =>
       _post('/api/member-auth/verify-otp', {'phone': phone, 'code': code});
 
   Future<ApiResult> logout() => _post('/api/member-auth/logout');
+
+  Future<ApiResult> requestTrainerOtp(String phone) => _post('/api/trainer-auth/request-otp', {'phone': phone});
+
+  Future<ApiResult> verifyTrainerOtp(String phone, String code) =>
+      _post('/api/trainer-auth/verify-otp', {'phone': phone, 'code': code});
+
+  Future<ApiResult> trainerLogout() => _post('/api/trainer-auth/logout');
+
+  Future<ApiResult> getTrainerMe() => _get('/api/trainer/me');
+
+  Future<ApiResult> getTrainerClients() => _get('/api/trainer/clients');
+
+  Future<ApiResult> getTrainerClientDetail(String memberId) => _get('/api/trainer/clients/$memberId');
+
+  Future<ApiResult> getMealPlans() => _get('/api/trainer/meal-plans');
+
+  Future<ApiResult> getMealPlanDetail(String planId) => _get('/api/trainer/meal-plans/$planId');
+
+  Future<ApiResult> createMealPlan(Map<String, dynamic> body) => _post('/api/trainer/meal-plans', body);
+
+  Future<ApiResult> updateMealPlan(String planId, Map<String, dynamic> body) =>
+      _patch('/api/trainer/meal-plans/$planId', body);
+
+  Future<ApiResult> deleteMealPlan(String planId) => _delete('/api/trainer/meal-plans/$planId');
+
+  Future<ApiResult> getWorkoutPlans() => _get('/api/trainer/workout-plans');
+
+  Future<ApiResult> getWorkoutPlanDetail(String planId) => _get('/api/trainer/workout-plans/$planId');
+
+  Future<ApiResult> createWorkoutPlan(Map<String, dynamic> body) => _post('/api/trainer/workout-plans', body);
+
+  Future<ApiResult> updateWorkoutPlan(String planId, Map<String, dynamic> body) =>
+      _patch('/api/trainer/workout-plans/$planId', body);
+
+  Future<ApiResult> deleteWorkoutPlan(String planId) => _delete('/api/trainer/workout-plans/$planId');
+
+  Future<ApiResult> assignMealPlan(String memberId, String mealPlanId, String startDate) =>
+      _post('/api/trainer/assignments', {'member_id': memberId, 'meal_plan_id': mealPlanId, 'start_date': startDate});
+
+  Future<ApiResult> endMealPlanAssignment(String assignmentId) =>
+      _patch('/api/trainer/assignments/$assignmentId', {'is_active': false});
+
+  Future<ApiResult> assignWorkoutPlan(String memberId, String workoutPlanId, String startDate) => _post(
+      '/api/trainer/workout-assignments', {'member_id': memberId, 'workout_plan_id': workoutPlanId, 'start_date': startDate});
+
+  Future<ApiResult> endWorkoutPlanAssignment(String assignmentId) =>
+      _patch('/api/trainer/workout-assignments/$assignmentId', {'is_active': false});
 
   Future<ApiResult> getMe() => _get('/api/portal/me');
 

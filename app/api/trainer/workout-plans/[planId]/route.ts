@@ -11,6 +11,25 @@ type ExerciseInput = {
   notes?: string | null;
 };
 
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ planId: string }> }) {
+  const trainer = await getSessionTrainer();
+  if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });
+
+  const { planId } = await params;
+  const supabase = getSupabaseServer();
+
+  const { data: plan } = await supabase.from("workout_plans").select("*").eq("id", planId).maybeSingle();
+  if (!plan) return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+
+  const { data: exercises } = await supabase
+    .from("workout_plan_exercises")
+    .select("day_label, name, sets, reps, rest_seconds, notes")
+    .eq("workout_plan_id", planId)
+    .order("order_index", { ascending: true });
+
+  return NextResponse.json({ ok: true, plan, exercises: exercises || [] });
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ planId: string }> }) {
   const trainer = await getSessionTrainer();
   if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });

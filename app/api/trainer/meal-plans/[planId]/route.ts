@@ -12,6 +12,25 @@ type MealItemInput = {
   notes?: string | null;
 };
 
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ planId: string }> }) {
+  const trainer = await getSessionTrainer();
+  if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });
+
+  const { planId } = await params;
+  const supabase = getSupabaseServer();
+
+  const { data: plan } = await supabase.from("meal_plans").select("*").eq("id", planId).maybeSingle();
+  if (!plan) return NextResponse.json({ ok: false, error: "Not found." }, { status: 404 });
+
+  const { data: items } = await supabase
+    .from("meal_plan_items")
+    .select("meal_type, name, calories, protein_g, carbs_g, fats_g, notes")
+    .eq("meal_plan_id", planId)
+    .order("order_index", { ascending: true });
+
+  return NextResponse.json({ ok: true, plan, items: items || [] });
+}
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ planId: string }> }) {
   const trainer = await getSessionTrainer();
   if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });

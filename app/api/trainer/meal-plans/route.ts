@@ -12,6 +12,19 @@ type MealItemInput = {
   notes?: string | null;
 };
 
+export async function GET() {
+  const trainer = await getSessionTrainer();
+  if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });
+
+  const supabase = getSupabaseServer();
+  const { data: plans } = await supabase
+    .from("meal_plans")
+    .select("id, title, goal_type, created_at")
+    .order("created_at", { ascending: false });
+
+  return NextResponse.json({ ok: true, plans: plans || [] });
+}
+
 export async function POST(req: NextRequest) {
   const trainer = await getSessionTrainer();
   if (!trainer) return NextResponse.json({ ok: false, error: "Not logged in." }, { status: 401 });
