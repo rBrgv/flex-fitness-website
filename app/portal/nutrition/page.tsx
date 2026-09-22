@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSessionMember } from "@/lib/memberSession";
 import { getSupabaseServer } from "@/lib/supabaseServer";
+import { PortalNav } from "@/components/PortalNav";
 
 type MealItem = {
   meal_type: string;
@@ -59,7 +60,7 @@ export default async function NutritionPage() {
     : null;
 
   return (
-    <main className="min-h-screen bg-paper px-5 py-10 sm:px-8">
+    <main className="min-h-screen bg-paper px-5 pb-28 pt-8 sm:px-8 sm:pb-32">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
           <h1 className="mb-1 font-display text-2xl font-semibold text-ink">My Diet Plan</h1>
@@ -101,6 +102,7 @@ export default async function NutritionPage() {
           </p>
         )}
       </div>
+      <PortalNav active="nutrition" />
     </main>
   );
 }

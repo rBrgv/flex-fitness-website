@@ -3,6 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
+import { PortalNav } from "@/components/PortalNav";
+import { SITE } from "@/lib/content";
+import { todayInGymTimezone } from "@/lib/dateUtils";
 
 type Member = {
   name: string;
@@ -36,6 +39,12 @@ function formatTime(t: string) {
   return `${h12}:${String(m).padStart(2, "0")} ${period}`;
 }
 
+function daysUntil(date: string) {
+  const today = new Date(`${todayInGymTimezone()}T12:00:00Z`);
+  const end = new Date(`${date}T12:00:00Z`);
+  return Math.round((end.getTime() - today.getTime()) / 86_400_000);
+}
+
 export function PortalDashboard({
   member,
   bookings,
@@ -46,14 +55,22 @@ export function PortalDashboard({
   attendance: AttendanceRow[];
 }) {
   const router = useRouter();
-  const [checkinState, setCheckinState] = useState<"idle" | "loading" | "done" | "already">("idle");
+  const [checkinState, setCheckinState] = useState<"idle" | "loading" | "done" | "already" | "error">("idle");
+  const [confirmedAttendance, setConfirmedAttendance] = useState(attendance);
 
   async function handleCheckin() {
     setCheckinState("loading");
-    const res = await fetch("/api/member/checkin", { method: "POST" });
-    const data = await res.json();
-    setCheckinState(data.alreadyCheckedIn ? "already" : "done");
-    router.refresh();
+    try {
+      const res = await fetch("/api/member/checkin", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok || !data.ok) throw new Error(data.error || "Check-in failed");
+      setCheckinState(data.alreadyCheckedIn ? "already" : "done");
+      if (!data.alreadyCheckedIn) {
+        setConfirmedAttendance(previous => [{ checked_in_at: data.checkedInAt || new Date().toISOString() }, ...previous].slice(0, 10));
+      }
+    } catch {
+      setCheckinState("error");
+    }
   }
 
   async function handleLogout() {
@@ -63,7 +80,7 @@ export function PortalDashboard({
   }
 
   return (
-    <main className="min-h-screen bg-paper px-5 py-10 sm:px-8">
+    <main className="min-h-screen bg-paper px-5 pb-28 pt-8 sm:px-8 sm:pb-32">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -86,7 +103,7 @@ export function PortalDashboard({
         </div>
 
         <h1 className="mb-1 font-display text-2xl font-semibold text-ink">Hi, {member.name.split(" ")[0]}</h1>
-        <p className="mb-8 text-sm text-muted">{member.phone}</p>
+        <p className="mb-6 text-sm text-muted">Here&apos;s your membership today.</p>
 
         <div className="mb-6 rounded-2xl border border-line bg-panel p-6">
           <div className="mb-4 flex items-center justify-between">
@@ -97,7 +114,16 @@ export function PortalDashboard({
           </div>
           <p className="text-lg font-bold text-ink">{member.membership_plan || "—"}</p>
           {member.plan_end_date && (
-            <p className="mt-1 text-sm text-muted">Expires {formatDate(member.plan_end_date)}</p>
+            <>
+              <p className="mt-1 text-sm text-muted">Expires {formatDate(member.plan_end_date)}</p>
+              <p className={`mt-2 text-sm font-bold ${daysUntil(member.plan_end_date) <= 7 ? "text-red-400" : "text-gold"}`}>
+                {daysUntil(member.plan_end_date) < 0
+                  ? `Expired ${Math.abs(daysUntil(member.plan_end_date))} days ago`
+                  : daysUntil(member.plan_end_date) === 0
+                    ? "Expires today"
+                    : `${daysUntil(member.plan_end_date)} days remaining`}
+              </p>
+            </>
           )}
           {member.trainer_name && <p className="mt-3 text-sm text-muted">Trainer: <span className="text-ink">{member.trainer_name}</span></p>}
         </div>
@@ -115,10 +141,15 @@ export function PortalDashboard({
             {checkinState === "idle" && "Check in"}
             {checkinState === "done" && "✓ Checked in"}
             {checkinState === "already" && "✓ Already checked in today"}
+            {checkinState === "error" && "Try check-in again"}
           </button>
+          {checkinState === "error" && <p className="mt-3 text-center text-xs text-red-400">Check-in didn&apos;t work. Please try again or message the gym.</p>}
         </div>
 
-        <div className="mb-6 grid grid-cols-2 gap-3">
+        <div className="mb-6 grid grid-cols-3 gap-3">
+          <Link href="/portal/classes" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
+            Book a Class
+          </Link>
           <Link href="/portal/nutrition" className="rounded-2xl border border-line bg-panel p-4 text-center text-sm font-bold text-ink hover:border-accent">
             Nutrition Plan
           </Link>
@@ -127,10 +158,16 @@ export function PortalDashboard({
           </Link>
         </div>
 
+        <a href={SITE.whatsappLink} className="mb-6 block rounded-2xl border border-gold/40 bg-accent/10 p-4 text-center text-sm font-bold text-gold hover:border-gold">
+          Need help? Message us
+        </a>
+
         <div className="mb-6 rounded-2xl border border-line bg-panel p-6">
           <span className="mb-3 block text-sm font-bold uppercase tracking-wide text-muted">Upcoming classes</span>
           {bookings.length === 0 ? (
-            <p className="text-sm text-muted">No upcoming bookings. Message us on WhatsApp to book a class.</p>
+            <p className="text-sm text-muted">
+              No upcoming bookings. <Link href="/portal/classes" className="font-bold text-gold hover:underline">Book a class →</Link>
+            </p>
           ) : (
             <ul className="flex flex-col gap-3">
               {bookings.map((b) => (
@@ -150,11 +187,11 @@ export function PortalDashboard({
 
         <div className="rounded-2xl border border-line bg-panel p-6">
           <span className="mb-3 block text-sm font-bold uppercase tracking-wide text-muted">Recent attendance</span>
-          {attendance.length === 0 ? (
+          {confirmedAttendance.length === 0 ? (
             <p className="text-sm text-muted">No check-ins logged yet.</p>
           ) : (
             <ul className="flex flex-col gap-2">
-              {attendance.map((a, i) => (
+              {confirmedAttendance.map((a, i) => (
                 <li key={i} className="text-sm text-ink">
                   {new Date(a.checked_in_at).toLocaleString("en-IN", {
                     day: "numeric",
@@ -168,6 +205,7 @@ export function PortalDashboard({
           )}
         </div>
       </div>
+      <PortalNav active="home" />
     </main>
   );
 }

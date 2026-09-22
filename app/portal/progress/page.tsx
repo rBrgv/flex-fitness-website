@@ -4,6 +4,7 @@ import { getSessionMember } from "@/lib/memberSession";
 import { getSupabaseServer } from "@/lib/supabaseServer";
 import { todayInGymTimezone } from "@/lib/dateUtils";
 import { MemberProgressTracker } from "@/components/MemberProgressTracker";
+import { PortalNav } from "@/components/PortalNav";
 
 export default async function ProgressPage() {
   const member = await getSessionMember();
@@ -40,7 +41,7 @@ export default async function ProgressPage() {
   }
 
   return (
-    <main className="min-h-screen bg-paper px-5 py-10 sm:px-8">
+    <main className="min-h-screen bg-paper px-5 pb-28 pt-8 sm:px-8 sm:pb-32">
       <div className="mx-auto max-w-2xl">
         <div className="mb-8">
           <h1 className="mb-1 font-display text-2xl font-semibold text-ink">My Progress</h1>
@@ -49,6 +50,7 @@ export default async function ProgressPage() {
 
         <MemberProgressTracker today={todayInGymTimezone()} logs={logs || []} photos={signedPhotos} />
       </div>
+      <PortalNav active="progress" />
     </main>
   );
 }

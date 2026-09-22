@@ -76,12 +76,24 @@ export default async function TrainerSchedulePage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-xl font-bold text-ink">Hi, {trainer.name}</h1>
-            <p className="text-sm text-muted">Your schedule this week</p>
+            <p className="text-sm text-muted">Your day at Flex · {today}</p>
           </div>
           <TrainerLogoutButton />
         </div>
 
-        <div className="mb-6 flex gap-3">
+        <section aria-labelledby="trainer-today" className="mb-6 rounded-2xl border border-line bg-panel p-6">
+          <h2 id="trainer-today" className="mb-4 text-xl font-bold text-ink">Today&apos;s classes</h2>
+          {sessions.filter(s => s.date === today).length === 0 ? (
+            <p className="text-sm text-muted">No group classes today. Open My Clients to review your assigned members and their plans.</p>
+          ) : sessions.filter(s => s.date === today).map(s => (
+            <div key={s.id} className="flex flex-wrap items-center justify-between gap-3 border-b border-line py-3 last:border-0">
+              <div><p className="font-bold text-ink">{s.name}</p><p className="text-sm text-muted">{formatTime(s.start_time)}–{formatTime(s.end_time)}</p></div>
+              <span className="text-sm text-gold">{((bookings as BookingRow[] | null) || []).filter(b => b.class_id === s.id && b.class_date === today).length} bookings</span>
+            </div>
+          ))}
+        </section>
+
+        <div className="mb-6 flex flex-wrap gap-3">
           <Link href="/trainer/clients" className="rounded-lg border border-line bg-panel px-4 py-2 text-sm font-bold text-ink hover:border-accent">
             My Clients
           </Link>
@@ -90,6 +102,15 @@ export default async function TrainerSchedulePage() {
           </Link>
         </div>
 
+        <details className="mb-6 rounded-xl border border-line p-4 text-sm">
+          <summary className="cursor-pointer font-bold text-ink">New here? Start with these steps</summary>
+          <ol className="mt-3 list-decimal space-y-2 pl-5 text-muted">
+            <li>Check today&apos;s classes and review the member list in your weekly schedule below.</li>
+            <li>Open My Clients to see the members assigned to you.</li>
+            <li>Use Meal Plan Templates to prepare plans, then assign them from a client&apos;s page.</li>
+          </ol>
+        </details>
+        <h2 className="mb-4 text-xl font-bold text-ink">This week</h2>
         {sessions.length === 0 ? (
           <p className="rounded-lg border border-line bg-panel p-6 text-sm text-muted">
             No classes assigned to you right now.

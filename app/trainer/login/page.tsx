@@ -27,6 +27,8 @@ export default function TrainerLoginPage() {
         return;
       }
       setStep("code");
+    } catch {
+      setError("We couldn't reach the login service. Check your connection and try again.");
     } finally {
       setLoading(false);
     }
@@ -49,6 +51,8 @@ export default function TrainerLoginPage() {
       }
       router.push("/trainer");
       router.refresh();
+    } catch {
+      setError("We couldn't reach the login service. Check your connection and try again.");
     } finally {
       setLoading(false);
     }

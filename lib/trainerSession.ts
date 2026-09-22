@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { getSupabaseServer } from "./supabaseServer";
+import { findSession } from "./portalAuth";
 
 // Resolves the logged-in trainer from the flex_trainer_session cookie,
 // server-side only — same shape as getSessionMember(), a separate cookie
@@ -11,11 +12,7 @@ export async function getSessionTrainer() {
   if (!token) return null;
 
   const supabase = getSupabaseServer();
-  const { data: session } = await supabase
-    .from("trainer_sessions")
-    .select("trainer_id, expires_at")
-    .eq("token", token)
-    .maybeSingle();
+  const session = await findSession(supabase, "trainer_sessions", token, "trainer_id");
 
   if (!session || new Date(session.expires_at) < new Date()) return null;
 

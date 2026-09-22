@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 
 import '../api_client.dart';
 import '../main.dart';
+import 'classes_screen.dart';
 import 'login_screen.dart';
 import 'nutrition_screen.dart';
 import 'progress_screen.dart';
@@ -138,6 +139,13 @@ class _HomeScreenState extends State<HomeScreen> {
               children: [
                 Expanded(
                   child: _NavCard(
+                    label: 'Book a Class',
+                    onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClassesScreen())),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _NavCard(
                     label: 'Nutrition Plan',
                     onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NutritionScreen())),
                   ),
@@ -183,7 +191,15 @@ class _HomeScreenState extends State<HomeScreen> {
                   const Text('UPCOMING CLASSES', style: TextStyle(color: kMuted, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
                   const SizedBox(height: 10),
                   if (bookings.isEmpty)
-                    const Text('No upcoming bookings. Message us on WhatsApp to book a class.', style: TextStyle(color: kMuted, fontSize: 13))
+                    GestureDetector(
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ClassesScreen())),
+                      child: const Text.rich(
+                        TextSpan(children: [
+                          TextSpan(text: 'No upcoming bookings. ', style: TextStyle(color: kMuted, fontSize: 13)),
+                          TextSpan(text: 'Book a class →', style: TextStyle(color: kGold, fontSize: 13, fontWeight: FontWeight.bold)),
+                        ]),
+                      ),
+                    )
                   else
                     ...bookings.map((b) {
                       final cls = b['classes'] as Map<String, dynamic>?;

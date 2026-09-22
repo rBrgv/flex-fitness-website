@@ -1,5 +1,6 @@
 import { Header } from "@/components/Header";
-import { Hero } from "@/components/Hero";
+import { MarketingHero } from "@/components/MarketingHero";
+import { GettingStarted } from "@/components/GettingStarted";
 import { StatsBar } from "@/components/StatsBar";
 import { TourTeaser } from "@/components/TourTeaser";
 import { Services } from "@/components/Services";
@@ -18,13 +19,14 @@ export const revalidate = 3600;
 
 export default function Home() {
   return (
-    <>
+    <div className="marketing-site">
       <Header />
       <main>
-        <Hero />
+        <MarketingHero />
         <StatsBar />
-        <TourTeaser />
         <Services />
+        <TourTeaser />
+        <GettingStarted />
         <ClassSchedule />
         <Pricing />
         <GoldDivider />
@@ -35,6 +37,6 @@ export default function Home() {
         <CtaBanner />
       </main>
       <Footer />
-    </>
+    </div>
   );
 }

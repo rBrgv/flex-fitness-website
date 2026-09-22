@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { getSupabaseServer } from "./supabaseServer";
+import { findSession } from "./portalAuth";
 
 // Resolves the logged-in member from the flex_session cookie, server-side
 // only. Returns null if there's no session, it's expired, or the member
@@ -11,11 +12,7 @@ export async function getSessionMember() {
   if (!token) return null;
 
   const supabase = getSupabaseServer();
-  const { data: session } = await supabase
-    .from("member_sessions")
-    .select("member_id, expires_at")
-    .eq("token", token)
-    .maybeSingle();
+  const session = await findSession(supabase, "member_sessions", token, "member_id");
 
   if (!session || new Date(session.expires_at) < new Date()) return null;
 

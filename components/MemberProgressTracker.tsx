@@ -121,7 +121,7 @@ export function MemberProgressTracker({
       {tab === "measurements" && (
         <>
           <div className="rounded-2xl border border-line bg-panel p-6">
-            <span className="mb-3 block text-sm font-bold uppercase tracking-wide text-muted">Log today's numbers</span>
+            <span className="mb-3 block text-sm font-bold uppercase tracking-wide text-muted">Log today&apos;s numbers</span>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {MEASUREMENT_FIELDS.map((f) => (
                 <div key={f.key}>

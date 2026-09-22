@@ -10,7 +10,7 @@ export function Services() {
       <SectionHeading
         eyebrow="What we offer"
         title="Everything you need to train, in one place"
-        description="Real photos from inside Flex Fitness — not stock images."
+        description="Lift, move, recover. Find the training that brings you back tomorrow."
       />
 
       <div className="grid gap-5 sm:grid-cols-2">
@@ -21,7 +21,7 @@ export function Services() {
             className={i === SERVICES.length - 1 ? "sm:col-span-2" : undefined}
           >
             <div className="group relative h-full overflow-hidden rounded-2xl border border-line bg-panel transition-all duration-300 hover:-translate-y-1 hover:border-accent/50 hover:shadow-[0_12px_32px_-12px_rgba(232,169,61,0.25)]">
-              <div className="relative h-36 w-full overflow-hidden">
+              <div className="relative h-64 w-full overflow-hidden">
                 <Image
                   src={service.photo}
                   alt={service.name}

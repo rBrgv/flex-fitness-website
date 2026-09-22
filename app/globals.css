@@ -54,3 +54,40 @@ h1, h2, h3 {
   letter-spacing: -0.01em;
   text-wrap: balance;
 }
+
+/* Scoped to the public homepage; portal styling stays independent. */
+.marketing-site{--color-paper:#11130f;--color-panel:#1b1e18;--color-line:#363b2f;--color-muted:#b2b8a7;--color-accent:#edc77f;--color-gold:#edc77f;background:var(--color-paper);}
+.marketing-site a:focus-visible,.marketing-site button:focus-visible{outline:2px solid var(--color-gold);outline-offset:5px;}
+.marketing-hero{max-width:1280px;margin:auto;display:grid;grid-template-columns:1fr 1fr;gap:48px;padding:56px 32px 64px;align-items:center;}
+.marketing-eyebrow{font-size:11px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--color-gold);margin-bottom:24px;}
+.marketing-intro h1{font-size:clamp(44px,5.2vw,76px);line-height:1.06;font-weight:600;letter-spacing:-.035em;}
+.marketing-intro h1 span{color:var(--color-gold);}
+.marketing-description{max-width:470px;font-size:16px;line-height:1.8;color:var(--color-muted);margin-top:26px;}
+.marketing-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:32px;}
+.marketing-primary,.marketing-secondary{display:inline-flex;align-items:center;justify-content:space-between;gap:22px;min-height:50px;padding:14px 20px;border-radius:8px;font-size:13px;font-weight:650;transition:transform .18s ease,background .18s ease;}
+.marketing-primary{background:var(--color-gold);color:#211b10;}
+.marketing-primary:hover{background:#f6dba8;transform:translateY(-2px);}
+.marketing-secondary{border:1px solid #515846;color:var(--color-ink);}
+.marketing-secondary:hover{background:#252a20;}
+.marketing-note{font-size:12px;color:var(--color-muted);margin-top:28px;line-height:1.8;}
+.marketing-note span{display:block;}
+.marketing-member{display:inline-block;margin-top:16px;font-size:12px;text-decoration:underline;text-underline-offset:4px;color:var(--color-muted);}
+.marketing-photo{position:relative;min-height:560px;overflow:hidden;border-radius:110px 18px 18px 18px;background:#242820;}
+.marketing-photo-shade{position:absolute;inset:0;background:linear-gradient(180deg,#0003,transparent 35%,#000d);}
+.marketing-photo-tag{position:absolute;top:32px;right:24px;font-size:10px;font-weight:700;letter-spacing:.17em;color:#fff;}
+.marketing-photo-caption{position:absolute;bottom:32px;left:30px;right:30px;color:#fff;}
+.marketing-photo-caption p{font-family:var(--font-oswald),sans-serif;font-size:32px;max-width:280px;line-height:1.2;margin-bottom:24px;}
+.marketing-photo-caption a{display:flex;justify-content:space-between;border-top:1px solid #ffffff50;padding-top:18px;font-size:13px;}
+.marketing-start{max-width:1152px;margin:24px auto 64px;padding:48px 32px;display:grid;grid-template-columns:1fr 1fr;gap:64px;background:#20251b;border:1px solid #3d4533;border-radius:24px;}
+.marketing-start h2{font-size:42px;line-height:1.15;margin-bottom:28px;}
+.marketing-start ol{list-style:none;margin:0;padding:0;}
+.marketing-start li{display:flex;gap:22px;padding:22px 0;border-bottom:1px solid #3d4533;}
+.marketing-start li:last-child{border:0;}
+.marketing-step{color:var(--color-gold);font-size:13px;padding-top:5px;}
+.marketing-start h3{font-size:24px;margin-bottom:8px;}
+.marketing-start li p{font-size:14px;line-height:1.7;color:var(--color-muted);}
+@media(min-width:801px){.marketing-intro{animation:marketing-enter .5s ease-out;}.marketing-photo{animation:marketing-enter .7s ease-out;}}
+@keyframes marketing-enter{from{opacity:.65;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:1100px){.marketing-site header nav{gap:12px;}.marketing-site header nav a{font-size:12px;}}
+@media(max-width:800px){.marketing-hero{grid-template-columns:1fr;padding:36px 20px;gap:32px;}.marketing-photo{min-height:380px;border-top-left-radius:64px;}.marketing-start{margin:24px 20px 48px;padding:28px 22px;grid-template-columns:1fr;gap:12px;}.marketing-start h2{font-size:36px;}}
+@media(prefers-reduced-motion:reduce){.marketing-site *,.marketing-site *::before,.marketing-site *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important;}.marketing-primary:hover{transform:none;}}

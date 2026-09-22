@@ -1,44 +1,56 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseServer } from "@/lib/supabaseServer";
-
-const OTP_COOLDOWN_MS = 60_000;
-const OTP_TTL_MS = 5 * 60_000;
+import {
+  GENERIC_OTP_RESPONSE,
+  OTP_COOLDOWN_MS,
+  OTP_MAX_SENDS_PER_HOUR,
+  OTP_TTL_MS,
+  generateOtp,
+  hashOtp,
+  normalizePhone,
+  readJsonObject,
+  recordAuthEvent,
+} from "@/lib/portalAuth";
 
 export async function POST(req: NextRequest) {
-  const { phone } = await req.json();
-
-  if (!/^\d{10,15}$/.test(phone || "")) {
-    return NextResponse.json({ ok: false, error: "Enter a valid phone number." }, { status: 400 });
-  }
+  const body = await readJsonObject(req);
+  const phone = normalizePhone(body?.phone);
+  if (!phone) return NextResponse.json({ ok: false, error: "Enter a valid phone number." }, { status: 400 });
 
   const supabase = getSupabaseServer();
-
-  // Only registered members can log in — this is a member portal, not open signup.
   const { data: member } = await supabase.from("members").select("id, status").eq("phone", phone).maybeSingle();
-  if (!member) {
-    return NextResponse.json(
-      { ok: false, error: "This number isn't registered as a member. Contact the gym if you think this is a mistake." },
-      { status: 404 }
-    );
+
+  // Never disclose whether a phone number is in the member directory.
+  if (!member || member.status === "cancelled") {
+    await recordAuthEvent(supabase, { portal: "member", eventType: "otp_rejected", phone, success: false, request: req });
+    return NextResponse.json(GENERIC_OTP_RESPONSE);
   }
 
-  // Cooldown — avoid hammering WhatsApp sends for the same number.
-  const { data: recent } = await supabase
-    .from("otp_codes")
-    .select("created_at")
-    .eq("phone", phone)
-    .order("created_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
+  const oneHourAgo = new Date(Date.now() - 60 * 60_000).toISOString();
+  const [{ data: recent }, { count }] = await Promise.all([
+    supabase.from("otp_codes").select("created_at").eq("phone", phone).eq("purpose", "member").order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    supabase.from("otp_codes").select("id", { count: "exact", head: true }).eq("phone", phone).eq("purpose", "member").gte("created_at", oneHourAgo),
+  ]);
+
   if (recent && Date.now() - new Date(recent.created_at).getTime() < OTP_COOLDOWN_MS) {
     return NextResponse.json({ ok: false, error: "Please wait a moment before requesting another code." }, { status: 429 });
   }
+  if ((count || 0) >= OTP_MAX_SENDS_PER_HOUR) {
+    await recordAuthEvent(supabase, { portal: "member", eventType: "otp_rate_limited", phone, success: false, request: req });
+    return NextResponse.json({ ok: false, error: "Too many login attempts. Please try again later." }, { status: 429 });
+  }
 
-  const code = String(Math.floor(100000 + Math.random() * 900000));
+  const code = generateOtp();
   const expiresAt = new Date(Date.now() + OTP_TTL_MS).toISOString();
+  await supabase.from("otp_codes").update({ verified: true }).eq("phone", phone).eq("purpose", "member").eq("verified", false);
 
-  const { error: insertError } = await supabase.from("otp_codes").insert({ phone, code, expires_at: expiresAt });
+  const { data: otp, error: insertError } = await supabase
+    .from("otp_codes")
+    .insert({ phone, code: "hashed", code_hash: hashOtp(phone, code, "member"), purpose: "member", expires_at: expiresAt })
+    .select("id")
+    .single();
   if (insertError) {
+    await recordAuthEvent(supabase, { portal: "member", eventType: "otp_create_failed", phone, success: false, request: req });
     return NextResponse.json({ ok: false, error: "Could not generate a code — please try again." }, { status: 500 });
   }
 
@@ -47,11 +59,15 @@ export async function POST(req: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Member-Auth-Secret": process.env.MEMBER_AUTH_SECRET || "" },
       body: JSON.stringify({ phone, code }),
+      signal: AbortSignal.timeout(10_000),
     });
     if (!botRes.ok) throw new Error(`Bot responded ${botRes.status}`);
   } catch {
+    await supabase.from("otp_codes").delete().eq("id", otp.id);
+    await recordAuthEvent(supabase, { portal: "member", eventType: "otp_send_failed", phone, success: false, request: req });
     return NextResponse.json({ ok: false, error: "Could not send the code — please try again." }, { status: 502 });
   }
 
-  return NextResponse.json({ ok: true });
+  await recordAuthEvent(supabase, { portal: "member", eventType: "otp_sent", phone, success: true, request: req });
+  return NextResponse.json(GENERIC_OTP_RESPONSE);
 }

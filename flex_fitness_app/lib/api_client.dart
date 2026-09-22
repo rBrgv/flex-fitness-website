@@ -39,7 +39,11 @@ class ApiClient {
     final body = res.data;
     if (body is Map<String, dynamic>) {
       final ok = body['ok'] == true;
-      return ApiResult(ok: ok, error: body['error']?.toString(), data: body);
+      // Some routes return a machine-readable `error` code plus a
+      // human-readable `message` (e.g. class booking) — prefer the
+      // message for display when present.
+      final errorText = (body['message'] ?? body['error'])?.toString();
+      return ApiResult(ok: ok, error: errorText, data: body);
     }
     return ApiResult(ok: res.statusCode != null && res.statusCode! < 300, data: const {});
   }
@@ -74,6 +78,14 @@ class ApiClient {
   Future<ApiResult> checkin() => _post('/api/member/checkin');
 
   Future<ApiResult> getNutrition() => _get('/api/portal/nutrition');
+
+  Future<ApiResult> getBookableClasses() => _get('/api/portal/classes');
+
+  Future<ApiResult> bookClass(String classId, String date) =>
+      _post('/api/portal/classes/book', {'class_id': classId, 'date': date});
+
+  Future<ApiResult> cancelClass(String classId, String date) =>
+      _post('/api/portal/classes/cancel', {'class_id': classId, 'date': date});
 
   Future<ApiResult> getProgress() => _get('/api/portal/progress');
 
