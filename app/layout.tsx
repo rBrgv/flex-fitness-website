@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Oswald } from "next/font/google";
 import "./globals.css";
 
@@ -22,6 +22,16 @@ export const metadata: Metadata = {
   title: "Flex Fitness | Gym, Personal Training & Classes in Bengaluru",
   description:
     "Flex Fitness Bengaluru — general gym, personal training, group classes, functional training/CrossFit, and sports injury rehab. 500+ members and 1,500+ transformations.",
+};
+
+// viewport-fit=cover is required on iOS for env(safe-area-inset-*) to
+// resolve to a real value and for fixed-position elements (like
+// PortalNav's bottom bar) to be positioned correctly relative to the
+// actual visible viewport instead of the pre-notch layout viewport.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
